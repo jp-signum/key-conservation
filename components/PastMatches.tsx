@@ -1,10 +1,10 @@
 import React from "react";
 import { View, Text, FlatList, StyleSheet, Button } from "react-native";
 
-import { Match } from "../types";
+import { Match } from "../types/game";
 
 interface PastMatchesProps {
-  pastMatches: Match;
+  pastMatches: Match[];
   handleNewGame: () => void;
 }
 
@@ -12,43 +12,41 @@ const PastMatches: React.FC<PastMatchesProps> = ({
   pastMatches,
   handleNewGame,
 }) => {
-  const renderBoard = (board: (string | null)) => {
-    if (!board) {
-      return null; 
-    }
-
-    return (
-      <View style={styles.snapshotBoard}>
-        {board?.map((value, index) => (
-          <View key={index} style={styles.snapshotCell}>
-            <Text>{value}</Text>
-          </View>
-        )) ?? null}
-      </View>
-    );
-  };
+  const renderBoard = (board: (string | null)[]) => (
+    <View style={styles.snapshotBoard}>
+      {board.map((value, index) => (
+        <View key={index} style={styles.snapshotCell}>
+          <Text>{value}</Text>
+        </View>
+      ))}
+    </View>
+  );
 
   const renderItem = ({ item }: { item: Match }) => (
     <View style={styles.matchItem}>
       <Text>Winner: {item.winner || "Tie"}</Text>
-      {renderBoard(item.board)} {/* Render the board snapshot */}
+      {renderBoard(item.board)}
     </View>
   );
 
   return (
-    <View>
-      <Button title="New Game" onPress={handleNewGame} />
-      <Text>Past Matches:</Text>
-      <FlatList
-        data={pastMatches}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()}
-      />
-    </View>
+    <FlatList
+      data={pastMatches}
+      renderItem={renderItem}
+      keyExtractor={(_, index) => index.toString()}
+      contentContainerStyle={styles.container}
+    />
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+  },
+  header: {
+    fontSize: 22,
+    marginBottom: 10,
+  },
   matchItem: {
     padding: 10,
     borderBottomWidth: 1,

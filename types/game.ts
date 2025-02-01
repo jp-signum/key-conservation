@@ -1,5 +1,5 @@
 interface Match {
-  board: string | null;
+  board: (string | null)[];
   winner: string | null;
 }
 

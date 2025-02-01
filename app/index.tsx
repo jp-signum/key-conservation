@@ -1,15 +1,14 @@
 import React, { useState } from "react";
-import { Link } from "expo-router";
-import { Text, View, StyleSheet, Modal, Button } from "react-native";
+import { Text, View, StyleSheet, Modal, Button, SafeAreaView, FlatList } from "react-native";
 
-import { Match } from "../types"; 
+import { Match } from "@/types/game"; 
 import GameBoard from "@/components/GameBoard";
 import PastMatches from "@/components/PastMatches";
 
 export default function App() {
   const [playerTurn, setPlayerTurn] = useState<"X" | "O">("X");
   const [board, setBoard] = useState<Array<string | null>>(Array(9).fill(null));
-  const [pastMatches, setPastMatches] = useState<Match>();
+  const [pastMatches, setPastMatches] = useState<Match[]>([]);
   const [gameOverModalVisible, setGameOverModalVisible] = useState(false);
   const [gameOverMessage, setGameOverMessage] = useState("");
 
@@ -34,7 +33,10 @@ export default function App() {
       setGameOverModalVisible(true);
       
       //store past matches
-      setPastMatches([...pastMatches, { board: newBoard, winner }]); // Store winner or null (tie)
+      setPastMatches((prevPastMatches) => {
+        const newMatch: Match = { board: newBoard, winner }; 
+        return [... (prevPastMatches), newMatch]; 
+      });
       
       //reset starting conditions
       if (winner) {
@@ -73,34 +75,63 @@ export default function App() {
     return null;
   };
 
+  //reset to initial conditions
   const handleNewGame = () => {
     setBoard(Array(9).fill(null));
     setPlayerTurn("X");
     setGameOverModalVisible(false);
   };
 
-  return (
-    <View style={styles.container}>
+  const ListHeader = () => (
+    <View style={styles.headerContainer}>
       <Text style={styles.turnText}>Current Turn: {playerTurn}</Text>
-      <GameBoard board={board} cellPress={handleCellPress}></GameBoard>
-      <Link></Link>
-      <Modal
-        visible={gameOverModalVisible}
-        transparent={true}
-        animationType="fade"
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalText}>{gameOverMessage}</Text>
-            <Button title="New Game" onPress={handleNewGame} />
+      <GameBoard board={board} cellPress={handleCellPress} />
+      {gameOverModalVisible && (
+        <Modal visible={gameOverModalVisible} transparent animationType="fade">
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalText}>{gameOverMessage}</Text>
+              <Button title="New Game" onPress={handleNewGame} />
+            </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      )}
+      <Text style={styles.pastMatchesHeader}>Past Matches:</Text>
     </View>
+  )
+
+  return (
+    <SafeAreaView style={styles.safeContainer}>
+      <FlatList
+        data={pastMatches}
+        renderItem={({ item }) => (
+          <PastMatches
+            pastMatches={[item]}
+            handleNewGame={handleNewGame}
+          />
+        )}
+        keyExtractor={(_, index) => index.toString()}
+        ListHeaderComponent={ListHeader}
+        contentContainerStyle={styles.flatListContent}
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeContainer: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  flatListContent: {
+    padding: 20,
+    alignItems: "center",
+  },
+  headerContainer: {
+    width: "100%",
+    alignItems: "center",
+    marginBottom: 20,
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",
@@ -112,11 +143,16 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginBottom: 20,
   },
+  pastMatchesHeader: {
+    fontSize: 22,
+    marginTop: 30,
+    marginBottom: 10,
+  },
   modalContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
     backgroundColor: "white",
