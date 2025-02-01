@@ -17,6 +17,7 @@ export default function App() {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.turnText}>Current Turn: {playerTurn}</Text>
       <GameBoard board={board} cellPress={handleCellPress}></GameBoard>
     </View>
   );
@@ -29,5 +30,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
+  },
+  turnText: {
+    fontSize: 20,
+    marginBottom: 20,
   },
 });
