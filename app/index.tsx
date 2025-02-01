@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, Modal, Button } from "react-native";
 
 import GameBoard from "../components/GameBoard";
 
@@ -12,6 +12,8 @@ export default function App() {
   const [playerTurn, setPlayerTurn] = useState<"X" | "O">("X");
   const [board, setBoard] = useState<Array<string | null>>(Array(9).fill(null));
   const [pastMatches, setPastMatches] = useState<Match[]>([]);
+  const [gameOverModalVisible, setGameOverModalVisible] = useState(false);
+  const [gameOverMessage, setGameOverMessage] = useState("");
 
   const handleCellPress = (index: number) => {
     //exit condition -> if game is over or if cell is already filled
@@ -28,9 +30,21 @@ export default function App() {
     const gameOver = winner || newBoard.every((cell) => cell !== null);
 
     if (gameOver) {
+      //first compose and show end game modal
+      const message = winner ? `Player ${winner} wins!` : "It's a tie!";
+      setGameOverMessage(message);
+      setGameOverModalVisible(true);
+      
+      //store past matches
       setPastMatches([...pastMatches, { board: newBoard, winner: winner }]); // Store winner or null (tie)
-      setBoard(Array(9).fill(null));
-      setPlayerTurn("X");
+      
+      //reset starting conditions
+      if (winner) {
+        setPlayerTurn(winner === "X" ? "X" : winner === "O" ? "O" : "X");
+        setBoard(Array(9).fill(null));
+      } else {
+        setPlayerTurn("X"); // X starts if tie
+      }
     } else {
       setPlayerTurn(playerTurn === "X" ? "O" : "X");
     }
@@ -64,12 +78,25 @@ export default function App() {
   const handleNewGame = () => {
     setBoard(Array(9).fill(null));
     setPlayerTurn("X");
+    setGameOverModalVisible(false);
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.turnText}>Current Turn: {playerTurn}</Text>
       <GameBoard board={board} cellPress={handleCellPress}></GameBoard>
+      <Modal
+        visible={gameOverModalVisible}
+        transparent={true}
+        animationType="fade"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>{gameOverMessage}</Text>
+            <Button title="New Game" onPress={handleNewGame} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -85,5 +112,21 @@ const styles = StyleSheet.create({
   turnText: {
     fontSize: 20,
     marginBottom: 20,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalText: {
+    fontSize: 20,
+    marginBottom: 10,
   },
 });
