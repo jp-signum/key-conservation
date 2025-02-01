@@ -1,23 +1,21 @@
 import React, { useState } from "react";
+import { Link } from "expo-router";
 import { Text, View, StyleSheet, Modal, Button } from "react-native";
 
-import GameBoard from "../components/GameBoard";
-
-interface Match {
-  board: (string | null)[];
-  winner: string | null;
-}
+import { Match } from "../types"; 
+import GameBoard from "@/components/GameBoard";
+import PastMatches from "@/components/PastMatches";
 
 export default function App() {
   const [playerTurn, setPlayerTurn] = useState<"X" | "O">("X");
   const [board, setBoard] = useState<Array<string | null>>(Array(9).fill(null));
-  const [pastMatches, setPastMatches] = useState<Match[]>([]);
+  const [pastMatches, setPastMatches] = useState<Match>();
   const [gameOverModalVisible, setGameOverModalVisible] = useState(false);
   const [gameOverMessage, setGameOverMessage] = useState("");
 
   const handleCellPress = (index: number) => {
     //exit condition -> if game is over or if cell is already filled
-    if (board[index]) {
+    if (board[index] || checkWinner(board) ) {
       return;
     }
 
@@ -36,7 +34,7 @@ export default function App() {
       setGameOverModalVisible(true);
       
       //store past matches
-      setPastMatches([...pastMatches, { board: newBoard, winner: winner }]); // Store winner or null (tie)
+      setPastMatches([...pastMatches, { board: newBoard, winner }]); // Store winner or null (tie)
       
       //reset starting conditions
       if (winner) {
@@ -85,6 +83,7 @@ export default function App() {
     <View style={styles.container}>
       <Text style={styles.turnText}>Current Turn: {playerTurn}</Text>
       <GameBoard board={board} cellPress={handleCellPress}></GameBoard>
+      <Link></Link>
       <Modal
         visible={gameOverModalVisible}
         transparent={true}
