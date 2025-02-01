@@ -15,11 +15,50 @@ export default function App() {
 
   const handleCellPress = (index: number) => {
     //exit condition -> if game is over or if cell is already filled
+    if (board[index]) {
+      return;
+    }
 
     //handle players mark placement
     const newBoard = [...board];
     newBoard[index] = playerTurn;
     setBoard(newBoard);
+
+    const winner = checkWinner(newBoard);
+    const gameOver = winner || newBoard.every((cell) => cell !== null);
+
+    if (gameOver) {
+      setPastMatches([...pastMatches, { board: newBoard, winner: winner }]); // Store winner or null (tie)
+      setBoard(Array(9).fill(null));
+      setPlayerTurn("X");
+    } else {
+      setPlayerTurn(playerTurn === "X" ? "O" : "X");
+    }
+  };
+
+  const checkWinner = (currentBoard: (string | null)[]): string | null => {
+    const winningCombinations = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8], // Rows
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8], // Columns
+      [0, 4, 8],
+      [2, 4, 6], // Diagonals
+    ];
+
+    for (const combo of winningCombinations) {
+      const [a, b, c] = combo;
+      if (
+        currentBoard[a] &&
+        currentBoard[a] === currentBoard[b] &&
+        currentBoard[a] === currentBoard[c]
+      ) {
+        return currentBoard[a];
+      }
+    }
+    return null;
   };
 
   const handleNewGame = () => {
