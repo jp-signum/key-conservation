@@ -3,12 +3,24 @@ import { Text, View, StyleSheet } from "react-native";
 
 import GameBoard from "../components/GameBoard";
 
-export default function App() {
-  const [playerTurn, setPlayerTurn] = useState("X");
-  const [board, setBoard] = useState(Array(9).fill(null));
-  const [pastMatches, setPastMatches] = useState([]);
+interface Match {
+  board: (string | null)[];
+  winner: string | null;
+}
 
-  const handleCellPress = (index: number) => {};
+export default function App() {
+  const [playerTurn, setPlayerTurn] = useState<"X" | "O">("X");
+  const [board, setBoard] = useState<Array<string | null>>(Array(9).fill(null));
+  const [pastMatches, setPastMatches] = useState<Match[]>([]);
+
+  const handleCellPress = (index: number) => {
+    //exit condition -> if game is over or if cell is already filled
+
+    //handle players mark placement
+    const newBoard = [...board];
+    newBoard[index] = playerTurn;
+    setBoard(newBoard);
+  };
 
   const handleNewGame = () => {
     setBoard(Array(9).fill(null));
